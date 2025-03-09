@@ -10,7 +10,7 @@ This is a **Flask-based WhatsApp bot** designed to assist **radiologists** in re
 ---
 
 ## **📂 Project Structure**
-```
+```bash
 python-whatsapp-bot/
 │── .env                    # Environment variables (update with your WhatsApp API keys)
 │── run.py                   # Main Flask app runner
