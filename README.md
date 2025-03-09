@@ -1,4 +1,3 @@
-```markdown
 # 🏥 Radiology WhatsApp Bot
 
 This is a **Flask-based WhatsApp bot** designed to assist **radiologists** in recording and managing medical exam reports via **voice messages**. The bot:
@@ -12,35 +11,32 @@ This is a **Flask-based WhatsApp bot** designed to assist **radiologists** in re
 ## **📂 Project Structure**
 ```bash
 python-whatsapp-bot/
-│── .env                    # Environment variables (update with your WhatsApp API keys)
-│── run.py                   # Main Flask app runner
-│── sessions.json            # Stores active doctor sessions
-│── medical_reports.csv      # Stores recorded reports
+│── .env                     # Environment variables (update with your WhatsApp API keys)
+│── run.py                    # Main Flask app runner
+│── sessions.json             # Stores active doctor sessions
+│── medical_reports.csv       # Stores recorded reports
+│── requirements.txt          # Dependencies list
+│── README.md                 # This documentation
 │
-├── app/                     # Main application logic
-│   ├── __init__.py          # Initializes Flask app
-│   ├── views.py             # Handles incoming WhatsApp messages (webhooks)
-│   ├── config.py            # Loads configurations from .env
+├── app/                      # Main application logic
+│   ├── __init__.py           # Initializes Flask app
+│   ├── views.py              # Handles incoming WhatsApp messages (webhooks)
+│   ├── config.py             # Loads configurations from .env
 │   │
-│   ├── services/
+│   ├── services/             # Service logic for processing requests
 │   │   ├── whatsapp_utils.py  # WhatsApp API functions (message processing)
 │   │   ├── radiology_chat.py  # Handles the conversation flow for doctors
 │   │
-│   ├── utils/
-│   │   ├── file_utils.py     # Handles CSV and session file management
-│   │   ├── whatsapp_api.py   # Functions for sending WhatsApp messages
+│   ├── utils/                # Utility functions for file and API management
+│   │   ├── file_utils.py      # Handles CSV and session file management
+│   │   ├── whatsapp_api.py    # Functions for sending WhatsApp messages
 │   │
-│   ├── decorators/
-│   │   ├── security.py       # Verifies webhook requests
+│   ├── decorators/           # Security-related decorators
+│   │   ├── security.py        # Verifies webhook requests
 │   │
-│   └── start/
+│   └── start/                # Startup scripts for testing
 │       ├── whatsapp_quickstart.py  # Test script for sending messages
-│
-└── README.md                # This documentation
 ```
-
----
-
 ## **🛠️ How It Works**
 1. **Doctors start by specifying an exam type** (e.g., *"Resonancia"*, *"Tomografía"*) in a text message.
 2. The bot **stores the session** and considers all future voice messages as that exam type.
