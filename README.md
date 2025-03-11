@@ -31,11 +31,9 @@ python-whatsapp-bot/
 │   │   ├── file_utils.py      # Handles CSV and session file management
 │   │   ├── whatsapp_api.py    # Functions for sending WhatsApp messages
 │   │
-│   ├── decorators/           # Security-related decorators
-│   │   ├── security.py        # Verifies webhook requests
-│   │
-│   └── start/                # Startup scripts for testing
-│       ├── whatsapp_quickstart.py  # Test script for sending messages
+│   └── decorators/           # Security-related decorators
+│       ├── security.py        # Verifies webhook requests
+
 ```
 ## **🛠️ How It Works**
 1. **Doctors start by specifying an exam type** (e.g., *"Resonancia"*, *"Tomografía"*) in a text message.
