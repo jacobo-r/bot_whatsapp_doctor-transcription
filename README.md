@@ -59,7 +59,7 @@ Create a **`.env`** file in the root directory and update it with your WhatsApp 
 ```ini
 ACCESS_TOKEN=your_facebook_whatsapp_api_access_token
 PHONE_NUMBER_ID=your_whatsapp_phone_number_id
-VERSION=v18.0  # Update this if needed
+VERSION=v22.0  # Update this if needed
 VERIFY_TOKEN=your_custom_verification_token
 ```
 Replace `your_facebook_whatsapp_api_access_token` with your **WhatsApp API token**.
