@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask,render_template
 from app.config import load_configurations, configure_logging
 from .views import webhook_blueprint
 
@@ -9,6 +9,10 @@ def create_app():
     # Load configurations and logging settings
     load_configurations(app)
     configure_logging()
+
+    @app.route("/")
+    def home():
+        return render_template("index.html")
 
     # Import and register blueprints, if any
     app.register_blueprint(webhook_blueprint)
