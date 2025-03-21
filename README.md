@@ -23,6 +23,9 @@ python-whatsapp-bot/
 │   ├── views.py              # Handles incoming WhatsApp messages (webhooks)
 │   ├── config.py             # Loads configurations from .env
 │   │
+│   ├── templates/
+│   │   ├──index.html         #the website code is here
+│   │
 │   ├── services/             # Service logic for processing requests
 │   │   ├── whatsapp_utils.py  # WhatsApp API functions (message processing)
 │   │   ├── radiology_chat.py  # Handles the conversation flow for doctors
