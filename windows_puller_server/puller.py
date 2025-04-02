@@ -60,10 +60,22 @@ def download_file(filename, urgent):
     # Parse the filename
     try:
         parts = filename.split("_")
+        date_str = parts[0]  # e.g. '2025-03-26'
+        time_str = parts[2]  # e.g. '17-43-37'
         study_type = parts[3]
-        doctor_initials = parts[4].split(".")[0]  # remove file extension
-    except IndexError:
-        print(f"Invalid filename format: {filename}")
+        doctor_initials = parts[4].split(".")[0]
+
+        # Combine and parse timestamp
+        file_time = datetime.strptime(f"{date_str} {time_str}", "%Y-%m-%d %H-%M-%S")
+        now = datetime.now()
+
+        # Check if at least 1 minute has passed
+        if file_time + timedelta(minutes=1) > now:
+            print(f"⏳ Skipping {filename}: too recent (less than 1 minute old).")
+            return False
+
+    except (IndexError, ValueError) as e:
+        print(f"❌ Invalid filename format or time parsing failed: {filename}, error: {e}")
         return False
 
     doctor_full_name = DOCTOR_NAMES.get(doctor_initials, doctor_initials)
@@ -76,7 +88,6 @@ def download_file(filename, urgent):
 
     os.makedirs(target_folder, exist_ok=True)
 
-    # Paths
     source_path = os.path.join(target_folder, filename)
     mp3_path = os.path.join(target_folder, filename.rsplit(".", 1)[0] + ".mp3")
 
@@ -101,8 +112,9 @@ def download_file(filename, urgent):
         return True
 
     except Exception as e:
-        print(f"Failed to download or convert {filename}: {e}")
+        print(f"❌ Failed to download or convert {filename}: {e}")
         return False
+
         
 
 def send_ack(filename):
