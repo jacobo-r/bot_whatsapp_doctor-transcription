@@ -4,7 +4,9 @@ import time
 import requests
 from datetime import datetime
 from pydub import AudioSegment
-
+#
+#FILENAME SAMPLE: 2025-03-26_hora_17-43-37_EstudiosEspeciales_JR.ogg|
+#
 # ----------------------
 # Configuration
 # ----------------------
@@ -15,6 +17,13 @@ MANIFEST_URL = f"{BASE_URL}/manifest?token={TOKEN}"
 GET_FILE_URL = f"{BASE_URL}/get-audio"
 ACK_URL = f"{BASE_URL}/acknowledge-audio?token={TOKEN}"
 ACK_LOG = os.path.join(DEST_FOLDER, "ack_log.csv")
+
+# Map doctor initials to full names
+DOCTOR_NAMES = {
+    "JR": "Jacobo Ruiz",
+    "VR": "Victor Hugo Ruiz",
+    # Add more mappings as needed
+}
 
 # ----------------------
 # Utility Functions
@@ -36,30 +45,42 @@ def log_ack(filename):
         writer = csv.writer(f)
         writer.writerow([filename, datetime.now().isoformat()])
 
-def convert_ogg_to_mp3(source_path, target_path):
-    try:
-        audio = AudioSegment.from_file(source_path, format="ogg")
-        audio.export(target_path, format="mp3")
-        print(f"Converted to MP3: {target_path}")
-    except Exception as e:
-        print(f"Failed to convert {source_path} to MP3: {e}")
-
-
-def convert_to_mp3(source_path, target_path):
+def convert_to_mp3(source_path, target_path, bitrate="192k"):
     try:
         audio = AudioSegment.from_file(source_path)
-        audio.export(target_path, format="mp3")
-        print(f"🎧 Converted to MP3: {target_path}")
+        audio.export(target_path, format="mp3", bitrate=bitrate, parameters=["-acodec", "libmp3lame", "-b:a", bitrate])
+        print(f"🎧 Converted to MP3: {target_path} at {bitrate}")
     except Exception as e:
         print(f"❌ Failed to convert {source_path} to MP3: {e}")
 
 
-def download_file(filename):
+def download_file(filename, urgent):
     url = f"{GET_FILE_URL}/{filename}?token={TOKEN}"
-    source_path = os.path.join(DEST_FOLDER, filename)
-    mp3_path = os.path.join(DEST_FOLDER, filename.rsplit(".", 1)[0] + ".mp3")
 
-    print(f"\n⬇ Downloading {filename}...")
+    # Parse the filename
+    try:
+        parts = filename.split("_")
+        study_type = parts[3]
+        doctor_initials = parts[4].split(".")[0]  # remove file extension
+    except IndexError:
+        print(f"Invalid filename format: {filename}")
+        return False
+
+    doctor_full_name = DOCTOR_NAMES.get(doctor_initials, doctor_initials)
+
+    # Determine destination folder
+    if urgent:
+        target_folder = os.path.join(DEST_FOLDER, "URGENTE")
+    else:
+        target_folder = os.path.join(DEST_FOLDER, study_type, doctor_full_name)
+
+    os.makedirs(target_folder, exist_ok=True)
+
+    # Paths
+    source_path = os.path.join(target_folder, filename)
+    mp3_path = os.path.join(target_folder, filename.rsplit(".", 1)[0] + ".mp3")
+
+    print(f"\n⬇ Downloading {filename} to {target_folder}...")
 
     try:
         response = requests.get(url)
@@ -68,7 +89,7 @@ def download_file(filename):
             f.write(response.content)
         print(f"✅ Saved to {source_path}")
 
-        # Convert to MP3 (regardless of format)
+        # Convert to MP3 if needed
         file_ext = os.path.splitext(filename)[1].lower()
         if file_ext in [".ogg", ".mp4"]:
             convert_to_mp3(source_path, mp3_path)
@@ -78,8 +99,9 @@ def download_file(filename):
             print(f"⚠️ Unsupported file type: {file_ext} (skipped conversion)")
 
         return True
+
     except Exception as e:
-        print(f"❌ Failed to download or convert {filename}: {e}")
+        print(f"Failed to download or convert {filename}: {e}")
         return False
         
 
@@ -119,23 +141,27 @@ def sync_audio_files():
             continue
 
         row = entry["null"]
-        if len(row) < 4:
+        if len(row) < 5:
             continue
-
-        filename, received = row[1], row[3].strip().lower()
+        # waid, filename, urgent, delete, received
+        filename = row[1]
+        # they are all booleans
+        urgent = row[2].strip().lower() == "true"
+        delete = row[3].strip().lower() == "true"
+        received = row[4].strip().lower() == "true"
 
         if filename in acked_files:
-            if received != "true":
+            if not received:
                 print(f"🔁 Re-ACKing {filename}...")
                 if send_ack(filename):
                     log_ack(filename)
             continue
 
-        if received == "true":
+        if received:
             continue  # Already acknowledged, skip
 
         # Download and ACK
-        if download_file(filename):
+        if download_file(filename, urgent):
             if send_ack(filename):
                 log_ack(filename)
 
